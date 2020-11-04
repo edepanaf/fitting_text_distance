@@ -1,0 +1,19 @@
+Metadata-Version: 2.1
+Name: fitting-text-distance
+Version: 0.0.7
+Summary: A distance on sets of texts able to learn from examples.
+Home-page: https://github.com/pypa/sampleproject
+Author: Elie de Panafieu
+Author-email: elie.de_panafieu@nokia-bell-labs.com
+License: UNKNOWN
+Description: # Example Package
+        
+        This is a simple example package. You can use
+        [Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
+        to write your content.
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
