@@ -15,6 +15,37 @@ DEFAULT_NUMBER_OF_GRADIENT_STEPS = 6
 
 
 class FittingDistance:
+    """
+
+    Parameters
+    ----------
+    bag_collection: iterable of immutable iterables
+        The immutable iterables are called 'bags'.
+    distance: AbstractDistance (optional, default CosineDistance)
+    item_to_weight: dict(item: float) (optional, default weight 1. for each item)
+    tfidf: bool (optional, default False)
+        Whether tf-idf is used to calculate item weights.
+
+    Attributes
+    ----------
+    vectorize: FittingVectorization
+        Callable that turns a collection of bags into a vector (numpy array).
+    distance: AbstractDistance
+
+    Methods
+    -------
+    __call__(bags0: iterable of immutable iterables, bags1: iterable of immutable iterables) -> float
+        The distance between the vectorizations of the two bag collections.
+
+    fit(oracle_claims: OracleClaim,
+        speed: float between 0. and 1. (optional),
+        ratio_item_bag_fitting: float between 0. and 1. (optional, default 0.5),
+        number_of_gradient_steps: int (optional)) -> None
+
+    Examples
+    --------
+
+    """
 
     def __init__(self, bag_collection, distance=CosineDistance(), item_to_weight=None, tfidf=False):
         self.vectorize = FittingVectorization(bag_collection, item_to_weight=item_to_weight, tfidf=tfidf)

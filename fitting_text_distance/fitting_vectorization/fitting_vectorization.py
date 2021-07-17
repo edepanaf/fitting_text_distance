@@ -16,6 +16,54 @@ DEFAULT_NUMBER_OF_GRADIENT_STEPS = 6
 
 
 class FittingVectorization(Vectorization):
+    """ Adds to the 'Vectorization' class the ability to learn its weights from examples.
+
+    We call 'form' a function that takes as arguments a given number vectorizations and outputs a float.
+    Forms have an attribute 'partial_gradients' that has the same input type
+    and outputs a list of vectors representing the partial gradients of the form at the input.
+
+    A tuple '(form, arguments, interval)' contains a form,
+    a tuple of bags, called 'arguments'
+    and an interval represented as a tuple of two floats.
+    Fitting the item and bag weights means changing them
+    so that the output of 'form' on the vectorizations of the 'bags' from 'arguments'
+    is closer to 'interval'.
+
+    The main method is 'fit_from_tuples_of_forms_arguments_intervals'.
+
+    Parameters
+    ----------
+    bags: iterable of immutable iterable
+    item_to_weight: (optional) dict(item: float)
+    tfidf: (optional) bool, default 'False')
+
+    See the docstring of the 'Vectorization' class for more details.
+
+    Attributes
+    ----------
+    bag_vector_representation
+    item_vector_representation
+    item_bag_matrix
+    bag_weights_vector
+    item_weights_vector
+
+    Methods
+    -------
+    fit_from_tuples_of_forms_arguments_intervals(forms_arguments_intervals: list of tuples,
+                                                 speed: (optional) float
+                                                 ratio_item_bag_fitting: (optional) default 0.5
+                                                 number_of_gradient_steps: (optional) int)
+    linear_fit_from_form_arguments_interval(function: a form,
+                                            bag_arguments: iterable of bags (collection of immutable iterables),
+                                            target_interval: tuple of two floats,
+                                            speed: (optional) float, default 1.,
+                                            ratio_item_bag_fitting: (optional) default 0.5)
+    linear_fit_from_form_arguments_target(function: a form,
+                                          bag_arguments: iterable of bags (collection of immutable iterables),
+                                          target: float,
+                                          speed: (optional) float, default 1.,
+                                          ratio_item_bag_fitting: (optional) float, default 0.5)
+    """
 
     def __init__(self, bags, item_to_weight=None, tfidf=False):
         super().__init__(bags, item_to_weight=item_to_weight, tfidf=tfidf)
@@ -23,6 +71,39 @@ class FittingVectorization(Vectorization):
     def fit_from_tuples_of_forms_arguments_intervals(self, forms_arguments_intervals,
                                                      speed=DEFAULT_SPEED, ratio_item_bag_fitting=0.5,
                                                      number_of_gradient_steps=DEFAULT_NUMBER_OF_GRADIENT_STEPS):
+        """ Fit the item and bag weights so the forms of the vectorizations of the arguments are closer to the intervals
+
+        A tuple '(form, arguments, interval)' contains a form,
+        a tuple of bags, called 'arguments'
+        and an interval represented as a tuple of two floats.
+        Fitting the item and bag weights means changing them
+        so that the output of 'form' on the vectorizations of the 'bags' from 'arguments'
+        is closer to 'interval'.
+
+        This function inputs a ist of tuples '(form, arguments, interval)' to fit the item and bag weights.
+        The 'ratio_item_bag_fitting' optional argument decides whether the changes should apply
+        more to item or bag weights.
+
+        The 'speed' optional argument decides which ratio of the total distance to the target should be traveled.
+
+        The 'number_of_gradient_steps' optional argument fixes the number of small iterations
+        fitting each of the forms one after the other.
+
+        Parameters
+        ----------
+        forms_arguments_intervals
+        speed: (optional) float between 0. and 1.
+            Decides which ratio of the total distance to the target should be traveled
+        ratio_item_bag_fitting: (optional) float between 0. and 1.
+            Decides if the changes should apply more to item or bag weights.
+        number_of_gradient_steps: (optional) int
+            Higher: more precise, but slower.
+
+        Returns
+        -------
+        None
+        """
+
         forms_arguments_intervals = forms_arguments_intervals.copy()
         for _ in range(number_of_gradient_steps):
             random.shuffle(forms_arguments_intervals)
@@ -40,8 +121,8 @@ class FittingVectorization(Vectorization):
 
     def linear_fit_from_form_arguments_target(self, function, bag_arguments, target, speed=1.,
                                               ratio_item_bag_fitting=0.5):
-        """ 'speed' is the fraction of the straight-line distance to the target
-        traversed in one gradient descent step. """
+        # 'speed' is the fraction of the straight-line distance to the target
+        # traversed in one gradient descent step.
         item_and_bag_gradients = self.partial_gradients_from_form_on_vectorizations(function, bag_arguments)
         current_function_value = function(*(self(bags) for bags in bag_arguments))
         item_bag_fitting_balance = (ratio_item_bag_fitting, 1. - ratio_item_bag_fitting)
@@ -54,11 +135,7 @@ class FittingVectorization(Vectorization):
 
     def partial_gradients_from_form_on_vectorizations(self, function, bag_arguments):
         """
-        :param function: inputs several vectorizations and outputs a float.
-            Has an attribute 'function.partial_gradients' that has the same input as 'function'
-            and outputs a list of vectors representing the partial gradients of 'function' at the input.
-        :param bag_arguments: a collection of bags '(bag_0, ..., bag_n)' of length the arity of 'function'
-        :return: two vectors '(item_partial_gradient, bag_partial_gradient)' satisfying the following condition.
+
         Let 'f0' denote the 'self' function (fitting_vectorization) for the values
         'i0 := self.item_weights_vector' and 'b0 := self.bag_item_weights_vector'.
         Let 'item_perturbation' and 'bag_perturbation' denote two vectors
@@ -70,7 +147,19 @@ class FittingVectorization(Vectorization):
             + scalar_product(item_partial_gradient, item_perturbation)
             + scalar_product(bag_partial_gradient, bag_perturbation)
             + O(norm(item_perturbation)**2) + norm(bag_perturbation)**2).
+
+        Parameters
+        ----------
+        function: inputs several vectorizations and outputs a float.
+            Has an attribute 'function.partial_gradients' that has the same input as 'function'
+            and outputs a list of vectors representing the partial gradients of 'function' at the input.
+        bag_arguments: a collection of bags '(bag_0, ..., bag_n)' of length the arity of 'function'
+
+        Returns
+        -------
+        Two vectors '(item_partial_gradient, bag_partial_gradient)' satisfying the following condition.
         """
+
         bag_vectors = [self(bags) for bags in bag_arguments]
         function_partial_gradients = [gradient(*bag_vectors) for gradient in function.partial_gradients]
         matrix_of_partial_jacobian_duals = [self.partial_jacobian_duals_from_bags(bags) for bags in bag_arguments]
@@ -80,9 +169,7 @@ class FittingVectorization(Vectorization):
                 for partial_jacobian_duals in matrix_of_partial_jacobian_duals]
 
     def partial_jacobian_duals_from_bags(self, bags):
-        """
-        :param bags: bag collection
-        :return: pair of functions '(item_jacobian_dual, bag_jacobian_dual)'
+        """ Returns a pair of functions representing the item and bag Jacobian duals.
 
         Consider the function 'f0' equal to 'self' (fitting_vectorization of a bag collection) for some values
         'i0 := self.item_weights_vector' and 'b0 := self.bag_weights_vector',
@@ -95,7 +182,16 @@ class FittingVectorization(Vectorization):
         'vi := item_jacobian_dual(r)', 'vb := bag_jacobian_dual(r)' and satisfy
         'scalar_product(r, f1(bags)) = scalar_product(r, f0(bags)) + scalar_product(vi, item_perturbation)
                 + scalar_product(vb, bag_perturbation) + O(norm(item_perturbation)**2) + O(norm(bag_perturbation)**2)'.
+
+        Parameters
+        ----------
+        bags: bag collection
+
+        Returns
+        -------
+        pair of functions '(item_jacobian_dual, bag_jacobian_dual)'
         """
+
         bag_vector = self.bag_vector_representation(bags)
         vectorization = self(bags)
 
@@ -122,11 +218,18 @@ class FittingVectorization(Vectorization):
 
 def vectors_to_reach_target_from_partial_gradients(partial_gradients, balances, distance_to_target):
     """
-    :param partial_gradients: tuple of vectors '(g_0, ..., g_{n-1})'
-    :param balances: tuple of floats '(b_0, ..., b_{n-1})'
-    :param distance_to_target: float 'd'
-    :return: tuple of vectors '(v_0, ..., v_{n-1})' arg min of '{norm(sum_i b_i * v_i) | sum_i g_i^T * v_i = d}'
+
+    Parameters
+    ----------
+    partial_gradients: tuple of vectors '(g_0, ..., g_{n-1})'
+    balances: tuple of floats '(b_0, ..., b_{n-1})'
+    distance_to_target: float 'd'
+
+    Returns
+    -------
+    tuple of vectors '(v_0, ..., v_{n-1})' arg min of '{norm(sum_i b_i * v_i) | sum_i g_i^T * v_i = d}'
     """
+
     coefficients = [prod(a for a in balances if a != b)**2 for b in balances]
     common_factor = distance_to_target / sum(coefficients[index] * norm_from_vector(partial_gradients[index])**2
                                              for index in range(len(partial_gradients)))

@@ -7,6 +7,18 @@
 
 
 class OracleClaim:
+    """ A statement about what the distance between two collections of bags should be.
+
+    Parameters
+    ----------
+    pair_of_bags: tuple of two collections of bags (immutable iterables)
+    distance_interval: tuple of two floats
+
+    Attributes
+    ----------
+    pair_of_bags: tuple of two collections of bags (immutable iterables)
+    distance_interval: tuple of two floats
+    """
 
     def __init__(self, pair_of_bags, distance_interval):
         self.pair_of_bags = pair_of_bags

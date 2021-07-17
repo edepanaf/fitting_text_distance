@@ -113,6 +113,22 @@ def contains_only_nonnegative_coefficients(vector):
 
 
 def probabilities_from_vector(vector):
+    """Outputs a vector summing to '1.' and proportional to the input.
+
+    Parameters
+    ----------
+    vector: array of floats
+        Assumes the floats are nonnegative and not all zeros.
+
+    Returns
+    -------
+    The vector divided by its sum.
+
+    Raises
+    ------
+    ValueError
+        if the input sum is '0.' Does not test the non-negativity of the input coefficients.
+    """
     sum_vector = sum(vector)
     if sum_vector == 0.:
         raise ValueError
@@ -123,7 +139,7 @@ def information_log_from_vector(vector):
     return np.log2(vector, out=np.zeros_like(vector), where=(vector != 0))
 
 
-def power_from_vector(vector, power):
+def coefficient_wise_power_from_vector(vector, power):
     return vector ** power
 
 

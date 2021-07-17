@@ -2,7 +2,7 @@
 
 __author__ = """Elie de Panafieu"""
 __email__ = 'elie.de_panafieu@nokia-bell-labs.com'
-__version__ = '0.0.1'
+__version__ = '0.1.0'
 
 
 from .fitting_text_distance.oracle_claim import OracleClaim

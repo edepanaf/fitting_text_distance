@@ -11,11 +11,29 @@ from fitting_text_distance.distance.abstract_distance import AbstractDistance
 
 
 class CosineDistance(AbstractDistance):
+    """Cosine distance on vectors.
+
+    Inherits from AbstractDistance.
+
+    Attributes
+    ----------
+    partial_gradients: pair of functions of two vectors
+
+    Methods
+    -------
+    __call__(vector0, vector1) -> float
+        The cosine distance between the 'vector0' and 'vector1',
+        which is 1. minus their scalar product.
+    first_partial_gradient(vector0, vector1) -> float
+
+    second_partial_gradient(vector0, vector1) -> float
+    """
 
     def __init__(self):
         super().__init__()
 
     def __call__(self, vector0, vector1):
+        """Cosine distance between two vectors."""
         vector0 = normalize(vector0)
         vector1 = normalize(vector1)
         return 1. - scalar_product(vector0, vector1)
@@ -24,7 +42,7 @@ class CosineDistance(AbstractDistance):
         distance = self(vector0, vector1)
         normalized_vector0 = normalize(vector0)
         normalized_vector1 = normalize(vector1)
-        return ((1 - distance) * normalized_vector0 - normalized_vector1) / norm_from_vector(vector0)
+        return ((1. - distance) * normalized_vector0 - normalized_vector1) / norm_from_vector(vector0)
 
 
 """ def test_cosine_distance(self):

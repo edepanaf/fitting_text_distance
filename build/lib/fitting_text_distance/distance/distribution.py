@@ -22,7 +22,7 @@ class Distribution:
         return len(self.values)
 
     def get_moment(self, order):
-        return sum(coefficient_wise_vector_product(self.probabilities, power_from_vector(self.values, order)))
+        return sum(coefficient_wise_vector_product(self.probabilities, coefficient_wise_power_from_vector(self.values, order)))
 
     def get_mean(self):
         return self.get_moment(1)

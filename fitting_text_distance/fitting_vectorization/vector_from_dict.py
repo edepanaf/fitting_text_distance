@@ -10,7 +10,7 @@ from fitting_text_distance.tools.matrix_operations import *
 
 
 class VectorFromDict:
-    """ Define a callable object that turns dictionaries into vectors.
+    """Callable object that turns dictionaries into vectors.
 
         Parameters
         ----------
@@ -48,7 +48,7 @@ class VectorFromDict:
         self.silent = silent
 
     def __call__(self, key_to_weight, silent=None):
-        """ Turn a dictionary associating keys to their weights into a vector.
+        """ Turn a dictionary associating keys to their weights into a numpy array.
 
         Parameters
         ----------
@@ -75,6 +75,7 @@ class VectorFromDict:
 
             >>> assert(set(vector_from_dict({'b': 3.14, 'c': 1.})) == {0., 3.14, 1.})
         """
+
         if silent is None:
             silent = self.silent
         return vector_from_index_and_value_maps(self.index_map, key_to_weight, silent=silent)

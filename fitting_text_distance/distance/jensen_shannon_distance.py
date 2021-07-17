@@ -12,6 +12,30 @@ from fitting_text_distance.distance.abstract_distance import AbstractDistance
 
 
 class JensenShannonDistance(AbstractDistance):
+    """Distance on vectors with nonnegative coefficients.
+
+    Any non-zero vector of length 'n' with nonnegative coefficients
+    can be turned into a probability distribution on '{0, ... , n-1}'
+    by dividing each of its coefficients by their sum.
+    The JensenShannonDistance first turns its two vector arguments
+    into distributions, then outputs the square root
+    of their Jensen-Shannon divergence (defined below),
+    which is a metric distance on distributions.
+
+    Let B denote a random variable taking
+    value 0 with probability 1/2 and 1 with probability 1/2.
+    Let Z denote the a random integer sampled following 'distribution[B]'.
+    Then the Jensen-Shannon divergence of 'distribution[0]' and 'distribution[1]'
+    is defined as the mutual information between B and Z.
+
+    Methods
+    -------
+    __call__(vector0: array of floats, vector1: array of floats) -> float
+        The Jensen-Shannon distance between the renormalized arguments,
+        assuming their coefficient a non-negative and the vectors are non-zero.
+    first_partial_gradient(vector0: array of floats, vector1: array of floats) -> float
+    second_partial_gradient(vector0: array of floats, vector1: array of floats) -> float
+    """
 
     def __init__(self):
         super().__init__()

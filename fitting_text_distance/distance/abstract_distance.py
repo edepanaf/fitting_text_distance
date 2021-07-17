@@ -7,6 +7,15 @@
 
 
 class AbstractDistance:
+    """Abstract class for a (not necessarily metric) distance on vectors.
+
+    The two inheritors of this class are 'CosineDistance' and 'JensenShannonDistance'.
+
+    Attributes
+    ----------
+    partial_gradients: pair of functions of two vectors
+        The second function is the symmetric of the first (switched arguments).
+    """
 
     def __init__(self):
         self.partial_gradients = self.first_partial_gradient, self.second_partial_gradient
